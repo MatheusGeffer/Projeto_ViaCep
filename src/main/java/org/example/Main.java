@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
+import java.sql.*;
 
 
 public class Main {
@@ -38,6 +39,10 @@ public class Main {
         if (!estadoDestino.isEmpty()) {
             double valorFrete = calcularFrete(informacaoFrete.getPeso(), estadoDestino);
             System.out.println("O valor do frete é R$ " + valorFrete);
+
+            inserirNoBanco(peso, cpf, cepDestino, valorFrete);
+            mostrarDadosDoBanco();
+
         } else {
             System.out.println("Não foi possível calcular o frete.");
         }
@@ -80,4 +85,49 @@ public class Main {
             return estado.equals("PR") ? 37.50 : 49.90;
         }
     }
+
+    //Insere dados no banco
+    public static void inserirNoBanco(double peso, String cpf, String cep, double valorFrete) {
+        try {
+            Connection conexao = DriverManager.getConnection("jdbc:sqlite:bd_frete.db");
+            String inserir = "INSERT INTO clientes (peso, cpf, cepDestino, valorFrete) VALUES (?, ?, ?, ?)";
+            PreparedStatement comando = conexao.prepareStatement(inserir);
+            comando.setDouble(1, peso);
+            comando.setString(2, cpf);
+            comando.setString(3, cep);
+            comando.setDouble(4, valorFrete);
+            comando.executeUpdate();
+            comando.close();
+            conexao.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Mostra os dados inseridos no banco.
+    //Esta parte pode ser excluida depois da criação do arquivo para salvar os dados.
+    public static void mostrarDadosDoBanco() {
+        try {
+            Connection conexao = DriverManager.getConnection("jdbc:sqlite:bd_frete.db");
+            Statement comando = conexao.createStatement();
+            ResultSet resultado = comando.executeQuery("SELECT * FROM clientes");
+
+            while (resultado.next()) {
+                System.out.println("=============================");
+                System.out.println("ID: " + resultado.getInt("id"));
+                System.out.println("Peso: " + resultado.getDouble("peso"));
+                System.out.println("CPF: " + resultado.getString("cpf"));
+                System.out.println("CEP de Destino: " + resultado.getString("cepDestino"));
+                System.out.println("Valor do Frete: R$ " + resultado.getDouble("valorFrete"));
+                System.out.println("=============================");
+            }
+
+            resultado.close();
+            comando.close();
+            conexao.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
+

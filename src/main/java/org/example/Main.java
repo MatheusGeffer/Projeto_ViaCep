@@ -45,7 +45,6 @@ public class Main {
             System.out.println("O valor do frete é R$ " + valorFrete);
 
             inserirNoBanco(peso, cpf, cepDestino, valorFrete);
-            mostrarDadosDoBanco();
             SalvarArquivo.salvarInformacoes(peso, cpf, cepDestino, valorFrete);
 
         } else {
@@ -107,33 +106,5 @@ public class Main {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    //Mostra os dados inseridos no banco.
-    //Esta parte pode ser excluida depois da criação do arquivo para salvar os dados.
-    public static String mostrarDadosDoBanco() {
-        StringBuilder dados = new StringBuilder();
-        try {
-            Connection conexao = DriverManager.getConnection("jdbc:sqlite:bd_frete.db");
-            Statement comando = conexao.createStatement();
-            ResultSet resultado = comando.executeQuery("SELECT * FROM clientes");
-
-            while (resultado.next()) {
-                dados.append("=============================").append("\n");
-                dados.append("ID: ").append(resultado.getInt("id")).append("\n");
-                dados.append("Peso: ").append(resultado.getDouble("peso")).append("\n");
-                dados.append("CPF: ").append(resultado.getString("cpf")).append("\n");
-                dados.append("CEP de Destino: ").append(resultado.getString("cepDestino")).append("\n");
-                dados.append("Valor do Frete: R$ ").append(resultado.getDouble("valorFrete")).append("\n");
-                dados.append("=============================").append("\n");
-            }
-
-            resultado.close();
-            comando.close();
-            conexao.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return dados.toString();
     }
 }

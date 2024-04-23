@@ -9,6 +9,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 import java.sql.*;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class Main {
@@ -42,6 +46,7 @@ public class Main {
 
             inserirNoBanco(peso, cpf, cepDestino, valorFrete);
             mostrarDadosDoBanco();
+            SalvarArquivo.salvarInformacoes(peso, cpf, cepDestino, valorFrete);
 
         } else {
             System.out.println("Não foi possível calcular o frete.");
@@ -106,20 +111,21 @@ public class Main {
 
     //Mostra os dados inseridos no banco.
     //Esta parte pode ser excluida depois da criação do arquivo para salvar os dados.
-    public static void mostrarDadosDoBanco() {
+    public static String mostrarDadosDoBanco() {
+        StringBuilder dados = new StringBuilder();
         try {
             Connection conexao = DriverManager.getConnection("jdbc:sqlite:bd_frete.db");
             Statement comando = conexao.createStatement();
             ResultSet resultado = comando.executeQuery("SELECT * FROM clientes");
 
             while (resultado.next()) {
-                System.out.println("=============================");
-                System.out.println("ID: " + resultado.getInt("id"));
-                System.out.println("Peso: " + resultado.getDouble("peso"));
-                System.out.println("CPF: " + resultado.getString("cpf"));
-                System.out.println("CEP de Destino: " + resultado.getString("cepDestino"));
-                System.out.println("Valor do Frete: R$ " + resultado.getDouble("valorFrete"));
-                System.out.println("=============================");
+                dados.append("=============================").append("\n");
+                dados.append("ID: ").append(resultado.getInt("id")).append("\n");
+                dados.append("Peso: ").append(resultado.getDouble("peso")).append("\n");
+                dados.append("CPF: ").append(resultado.getString("cpf")).append("\n");
+                dados.append("CEP de Destino: ").append(resultado.getString("cepDestino")).append("\n");
+                dados.append("Valor do Frete: R$ ").append(resultado.getDouble("valorFrete")).append("\n");
+                dados.append("=============================").append("\n");
             }
 
             resultado.close();
@@ -128,5 +134,6 @@ public class Main {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return dados.toString();
     }
 }
